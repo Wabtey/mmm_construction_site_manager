@@ -10,8 +10,15 @@ class SideGame extends StatefulWidget {
   State<SideGame> createState() => _SideGameState();
 }
 
+class Location {
+  final Offset coordinates;
+  final String name;
+
+  Location({required this.coordinates, required this.name});
+}
+
 class _SideGameState extends State<SideGame> {
-  final List<Offset> _locations = [];
+  final List<Location> _locations = [];
   final GlobalKey _mapKey = GlobalKey();
   Size _previousSize = Size.zero;
 
@@ -47,27 +54,76 @@ class _SideGameState extends State<SideGame> {
       localOffset.dy / imageSize.height,
     );
     setState(() {
-      _locations.add(normalizedOffset -
-          Offset(
-              12 / imageSize.width, 22 / imageSize.height)); // Adjusted offset
+      _locations.add(Location(
+          coordinates: normalizedOffset -
+              Offset(12 / imageSize.width, 22 / imageSize.height),
+          name: "Location ${_locations.length + 1}")); // Adjusted offset
     });
   }
 
   /* ----------------------------- Action Buttons ----------------------------- */
   void _insertLocation(StateSetter listSetState) {
-    final TextEditingController dxController =
-        TextEditingController(text: "0.0");
-    final TextEditingController dyController =
-        TextEditingController(text: "0.0");
+    _showLocationDialog(
+      title: 'Insert Location',
+      name: '',
+      dx: '0.0',
+      dy: '0.0',
+      onSave: (name, dx, dy) {
+        setState(() {
+          _locations.add(Location(
+            coordinates: Offset(double.parse(dx), double.parse(dy)),
+            name: name.isEmpty ? "Location ${_locations.length + 1}" : name,
+          ));
+        });
+        listSetState(() {}); // Update the list view
+      },
+    );
+  }
+
+  void _editLocation(int index, StateSetter listSetState) {
+    final location = _locations[index];
+    _showLocationDialog(
+      title: 'Edit Location',
+      name: location.name,
+      dx: location.coordinates.dx.toString(),
+      dy: location.coordinates.dy.toString(),
+      onSave: (name, dx, dy) {
+        setState(() {
+          _locations[index] = Location(
+            coordinates: Offset(double.parse(dx), double.parse(dy)),
+            name: name.isEmpty ? "Location ${_locations.length}" : name,
+          );
+        });
+        listSetState(() {}); // Update the list view
+      },
+    );
+  }
+
+  void _showLocationDialog({
+    required String title,
+    required String name,
+    required String dx,
+    required String dy,
+    required void Function(String name, String dx, String dy) onSave,
+  }) {
+    final TextEditingController nameController =
+        TextEditingController(text: name);
+    final TextEditingController dxController = TextEditingController(text: dx);
+    final TextEditingController dyController = TextEditingController(text: dy);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Location'),
+          title: Text(title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'name'),
+                keyboardType: TextInputType.text,
+              ),
               TextField(
                 controller: dxController,
                 decoration: const InputDecoration(labelText: 'dx'),
@@ -89,13 +145,8 @@ class _SideGameState extends State<SideGame> {
             ),
             TextButton(
               onPressed: () {
-                setState(() {
-                  _locations.add(Offset(
-                    double.parse(dxController.text),
-                    double.parse(dyController.text),
-                  ));
-                });
-                listSetState(() {}); // Update the list view
+                onSave(
+                    nameController.text, dxController.text, dyController.text);
                 Navigator.of(context).pop();
               },
               child: const Text('Save'),
@@ -117,9 +168,9 @@ class _SideGameState extends State<SideGame> {
               itemBuilder: (context, index) {
                 final location = _locations[index];
                 return ListTile(
-                  title: Text('Location ${index + 1}'),
+                  title: Text(location.name),
                   subtitle: Text(
-                      '(${location.dx.toStringAsFixed(2)}, ${location.dy.toStringAsFixed(2)})'),
+                      '(${location.coordinates.dx.toStringAsFixed(2)}, ${location.coordinates.dy.toStringAsFixed(2)})'),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () {
@@ -130,59 +181,6 @@ class _SideGameState extends State<SideGame> {
               },
             );
           },
-        );
-      },
-    );
-  }
-
-  void _editLocation(int index, StateSetter listSetState) {
-    final location = _locations[index];
-    final TextEditingController dxController =
-        TextEditingController(text: location.dx.toString());
-    final TextEditingController dyController =
-        TextEditingController(text: location.dy.toString());
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Location'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: dxController,
-                decoration: const InputDecoration(labelText: 'dx'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: dyController,
-                decoration: const InputDecoration(labelText: 'dy'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _locations[index] = Offset(
-                    double.parse(dxController.text),
-                    double.parse(dyController.text),
-                  );
-                });
-                listSetState(() {}); // Update the list view
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
         );
       },
     );
@@ -237,8 +235,8 @@ class _SideGameState extends State<SideGame> {
                           .findRenderObject() as RenderBox;
                       final Size imageSize = box.size;
                       return Positioned(
-                        left: location.dx * imageSize.width,
-                        top: location.dy * imageSize.height,
+                        left: location.coordinates.dx * imageSize.width,
+                        top: location.coordinates.dy * imageSize.height,
                         child: const Icon(
                           Icons.location_on,
                           color: Colors.red,
