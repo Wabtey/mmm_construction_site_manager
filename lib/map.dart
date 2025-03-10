@@ -213,6 +213,16 @@ class _SideGameState extends State<SideGame> {
                         Padding(
                           key: _mapKey,
                           padding: const EdgeInsets.all(8.0),
+                          //   child: InteractiveViewer(
+                          //     panEnabled: false,
+                          //     minScale: 0.5,
+                          //     maxScale: 2,
+                          //     // scaleEnabled: !RawKeyboard.instance.keysPressed
+                          //     //     .contains(PhysicalKeyboardKey.controlLeft),
+                          //     child: Image.asset(
+                          //       'assets/LibertyCity-GTACW-Map.png',
+                          //     ),
+                          //   ),
                           child: const Image(
                               image: AssetImage(
                                   "assets/LibertyCity-GTACW-Map.png")),
@@ -254,12 +264,14 @@ class _SideGameState extends State<SideGame> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FloatingActionButton(
+              heroTag: 'locationInsertBtn',
               onPressed: () => _insertLocation(setState),
               tooltip: 'Increment',
               child: Text(_locations.length.toString()),
             ),
             const SizedBox(height: 10),
             FloatingActionButton(
+              heroTag: 'locationsListBtn',
               onPressed: _showLocationsList,
               tooltip: 'Show Locations',
               child: const Icon(Icons.list),
