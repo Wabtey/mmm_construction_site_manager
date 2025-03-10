@@ -177,6 +177,14 @@ class _SideGameState extends State<SideGame> {
                       _editLocation(index, setState);
                     },
                   ),
+                  leading: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() {
+                        _locations.removeAt(index);
+                      });
+                    },
+                  ),
                 );
               },
             );
@@ -195,7 +203,7 @@ class _SideGameState extends State<SideGame> {
       onTapUp: _handleMapClick,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Simulation Game'),
+          title: const Text('Chinatown Sites'),
         ),
         body: SingleChildScrollView(
           child: Center(
