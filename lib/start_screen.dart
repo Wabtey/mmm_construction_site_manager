@@ -112,7 +112,7 @@ class _StartScreenAnimationState extends State<StartScreenAnimation>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const map.SideGame(),
+                              builder: (context) => const map.Map(),
                             ),
                           );
                         },

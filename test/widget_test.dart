@@ -16,26 +16,19 @@ void main() {
       home: start_screen.StartScreenAnimation(),
     ));
 
-    // Build the StartScreen widget.
-    await tester.pumpWidget(const MaterialApp(
-      home: start_screen.StartScreenAnimation(),
-    ));
-
-    // Wait for the animation to complete
+    // animation completed
     await tester.pumpAndSettle();
 
-    // Verify that the login button is displayed.
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.text('Login'), findsOneWidget);
 
-    // Tap the login button.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
-    // Verify that we changed screen
+    // TOTEST: verify that we changed screen
     expect(find.byType(Image), findsOneWidget);
 
-    // Verify that the 'Go back' button is enable.
+    // 'Go back' button
     expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).onPressed,
         isNotNull);
   });

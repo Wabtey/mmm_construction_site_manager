@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mmm_construction_site_manager/start_screen.dart'
     as start_screen;
+import 'package:mmm_construction_site_manager/api/endpoints/user.dart';
 
-/* ------------------------------ Second Route ------------------------------ */
-class SideGame extends StatefulWidget {
-  const SideGame({super.key});
+class Map extends StatefulWidget {
+  const Map({super.key});
 
   @override
-  State<SideGame> createState() => _SideGameState();
+  State<Map> createState() => _MapState();
 }
 
 class Location {
@@ -17,10 +17,11 @@ class Location {
   Location({required this.coordinates, required this.name});
 }
 
-class _SideGameState extends State<SideGame> {
+class _MapState extends State<Map> {
   final List<Location> _locations = [];
   final GlobalKey _mapKey = GlobalKey();
   Size _previousSize = Size.zero;
+  final UserApi _userApi = UserApi(baseUrl: 'http://localhost:8000');
 
   /* -------------------------------------------------------------------------- */
   /*                                    Logic                                   */
@@ -182,6 +183,8 @@ class _SideGameState extends State<SideGame> {
                     onPressed: () {
                       setState(() {
                         _locations.removeAt(index);
+                        // update list
+                        this.setState(() {});
                       });
                     },
                   ),
@@ -192,6 +195,54 @@ class _SideGameState extends State<SideGame> {
         );
       },
     );
+  }
+
+  void _showUsers() async {
+    try {
+      final users = await _userApi.getAllUsers();
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('All Users'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final user = users[index];
+                  return ListTile(
+                    title: Text(user.username),
+                    subtitle: Text('Role: ${user.role ?? 'N/A'}'),
+                    trailing: Text('ID: ${user.id}'),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load users: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   /* -------------------------------------------------------------------------- */
@@ -221,16 +272,6 @@ class _SideGameState extends State<SideGame> {
                         Padding(
                           key: _mapKey,
                           padding: const EdgeInsets.all(8.0),
-                          //   child: InteractiveViewer(
-                          //     panEnabled: false,
-                          //     minScale: 0.5,
-                          //     maxScale: 2,
-                          //     // scaleEnabled: !RawKeyboard.instance.keysPressed
-                          //     //     .contains(PhysicalKeyboardKey.controlLeft),
-                          //     child: Image.asset(
-                          //       'assets/LibertyCity-GTACW-Map.png',
-                          //     ),
-                          //   ),
                           child: const Image(
                               image: AssetImage(
                                   "assets/LibertyCity-GTACW-Map.png")),
@@ -283,6 +324,13 @@ class _SideGameState extends State<SideGame> {
               onPressed: _showLocationsList,
               tooltip: 'Show Locations',
               child: const Icon(Icons.list),
+            ),
+            const SizedBox(height: 10),
+            FloatingActionButton(
+              heroTag: 'usersListBtn',
+              onPressed: _showUsers,
+              tooltip: 'Show Users',
+              child: const Icon(Icons.people),
             ),
           ],
         ),
