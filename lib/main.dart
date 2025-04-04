@@ -1,24 +1,12 @@
 import 'package:flutter/material.dart';
-import 'start_screen.dart';
+import 'package:mmm_construction_site_manager/custom_material_app.dart';
+import 'start_screen.dart' as start_screen;
 
 void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  runApp(
+    const CustomMaterialApp(
       title: 'Construction Site Manager',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        // colorScheme: const ColorScheme.dark(),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.dark,
-      home: const StartScreen(title: 'Welcome page'),
-    );
-  }
+      home: start_screen.StartScreen(title: 'Welcome page'),
+    ),
+  );
 }

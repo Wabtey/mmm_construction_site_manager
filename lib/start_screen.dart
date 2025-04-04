@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mmm_construction_site_manager/map.dart' as map;
 
 /* -------------------------------------------------------------------------- */
 /*                                Actual Screen                               */
@@ -16,15 +17,11 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: Text(widget.title),
-            ),
-            body: const Center(
-              child: StartScreenAnimation(),
-            )));
+    return const Scaffold(
+      body: Center(
+        child: StartScreenAnimation(),
+      ),
+    );
   }
 }
 
@@ -84,23 +81,46 @@ class _StartScreenAnimationState extends State<StartScreenAnimation>
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       // NOTE: we're using a scroll view to allow the overflow but we want to lock it
+      // TOTEST: the scroll seems to be locked
       physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          if (_showText)
-            const Text(
-              'Welcome to the Construction Site Manager!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            )
-          else
-            const SizedBox(height: 35),
-          SlideTransition(
-            position: _offsetAnimation,
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Image(image: AssetImage("assets/Buildings_shape.png")),
+          Align(
+            alignment: Alignment.center,
+            child: SlideTransition(
+              position: _offsetAnimation,
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Image(image: AssetImage("assets/Buildings_shape.png")),
+              ),
             ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: _showText
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Welcome to the Construction Site Manager!',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 50),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const map.SideGame(),
+                            ),
+                          );
+                        },
+                        child: const Text("Login"),
+                      ),
+                    ],
+                  )
+                : const SizedBox(height: 65),
           ),
         ],
       ),
